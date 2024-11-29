@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 /*interface containing all event functions for entity like update*/
-typedef struct events{
+typedef struct events_t{
     void (*update)(void* this); /*called every frame to update entity*/
 }events;
 

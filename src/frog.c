@@ -20,8 +20,17 @@ void frog_draw(void *this, WINDOW *win, void* additional_data)
 
 void frog_update(void *this)
 {
+    clock_t time = clock();
     Frog *f = (Frog *)this;
+
+    /*if there was not enough delay before last jump, we cannot move, so input should be ignored for frog*/
+    if((time-f->last_jump_time)/(double)CLOCKS_PER_SEC < FROG_MOVE_DELAY)
+        return;
+
+    f->last_jump_time = time;
+
     int keycode = getch();
+    flushinp(); /*flush input, otherwise characters gets buffered and its frustrating*/
     keycode=tolower(keycode);
 
     f->old_position->x = f->position->x;
@@ -92,17 +101,17 @@ void frog_enemy_car_collision(void* this){
     f->position->y=0;
 }
 
-void frog_friendly_car_collision(void* this){ /*well if you somehow collide with friendly car, you should bounce to your previous position*/
+void frog_friendly_car_collision(void* this){
     Frog* f = (Frog*)this;
 
+    /*well if you somehow collide with friendly car, you should bounce to your previous position*/
     f->position->x = f->old_position->x;
     f->position->y = f->old_position->y;
 }
 
 void frog_teleporter_car_collision(void* this){
-        Frog* f = (Frog*)this;
+    Frog* f = (Frog*)this;
 
-    /*bounce*/
     f->position->x= rand_in_range(0, BOARD_X - (2*BOARD_BORDER_X) -1);
     f->position->y= rand_in_range(0, BOARD_Y - (2*BOARD_BORDER_Y) -1);
 }

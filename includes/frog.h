@@ -9,12 +9,16 @@
 #include "background.h"
 #include <ncurses.h>
 
-typedef struct frog
+#define FROG_MOVE_DELAY 0.1f
+
+typedef struct frog_t
 {
     position* old_position; /*old position is used to erase previous position to prevent clearing whole screen while drawing*/
     position *position;
     drawing *drawing;
     events *events;
+
+    clock_t last_jump_time;
 
     void (*enemy_car_collision)(void* this); /*event trigerred when car hits frog, car should have its own collision event to prevent circular dependencies*/
     void (*friendly_car_collision)(void* this);

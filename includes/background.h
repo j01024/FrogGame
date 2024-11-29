@@ -4,11 +4,12 @@
 #include <stdbool.h>
 #include "colors.h"
 #include "setup.h"
+#include "utility.h"
 #include <stdlib.h>
 #include <assert.h>
 
 
-typedef struct BackgroundTile{
+typedef struct background_tile_t{
     char key;
     chtype color;
 }BackgroundTile;
@@ -20,7 +21,7 @@ extern BackgroundTile* tile_pavement;
 extern bool __background_initialized; /*when init is called this is set to true, so functions which uses background can be sure that it is initalized*/
 
 
-typedef struct Background{
+typedef struct background_t{
     int width, height;
     BackgroundTile*** tiles; /*dobule array of pointers (references)*/
 }Background;

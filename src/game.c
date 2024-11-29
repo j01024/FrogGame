@@ -6,7 +6,7 @@ void init_game()
     init_background();
     Game = (FrogGame*)malloc(sizeof(FrogGame));
     Game->background = new_background(BOARD_X-BOARD_BORDER_X*2,BOARD_Y-BOARD_BORDER_Y*2); /*border is from 2 sides*/
-    Game->frog = new_frog(0,0);
+    Game->frog = new_frog(BOARD_X/2,BOARD_Y - 2*BOARD_BORDER_Y - 1);/*middle bottom of board, minus 2 times border -1, to match 0 indexing*/
 
     Game->events = new_events();
     Game->events->update= game_update;
@@ -25,7 +25,7 @@ FrogGame* new_game()
     assert(__background_initialized && "Background has not been initialized, use init_background in your setup to initialize");
     FrogGame* game = (FrogGame*)malloc(sizeof(FrogGame));
     game->background = new_background(BOARD_X-BOARD_BORDER_X*2,BOARD_Y-BOARD_BORDER_Y*2); /*border is from 2 sides*/
-    game->frog = new_frog(0,0);
+    game->frog = new_frog(BOARD_X/2,BOARD_Y - BOARD_BORDER_Y); /*middle bottom of board*/
     fill_background(Game->background, tile_default); /*fill background with default tile to prevent frustrating null errors, when you forget about it*/
 
     game->events = new_events();
@@ -49,7 +49,9 @@ void game_update(void* this){
     for(int i=0;i<game->__cars_num;i++){
         Car* c = game->cars[i];
         c->events->update(game->cars[i]);
-        if(c->frog_collision(c, frog)){/*check car collisions with frog*/
+
+        /*check car collisions with frog*/
+        if(c->frog_collision(c)){
             switch(c->car_type){
                 case CAR_FRIENDLY:
                     frog->friendly_car_collision(frog);
@@ -91,17 +93,25 @@ void game_generate_background(FrogGame* game){
     assert(game!=NULL);
     Background* bg = game->background;
 
-        /*top is always grass, since level ends here, and bottom should be always pavement (you can change to grass) cause frog spawns here, and we don't want instant death*/
+    /*top is always grass, since level ends here, and bottom should be always pavement (you can change to grass) cause frog spawns here, and we don't want instant death*/
     background_fill_area(bg,0,0,bg->width,1, tile_grass); //top is grass
 
+    BackgroundTile* previous_tile=NULL;
     for(int x=1;x<bg->height-1;x++){
-        /*tiles are in range 3-5*/
         BackgroundTile* random_tile = get_random_tile();
+        if(previous_tile != tile_road && random_tile !=tile_road)
+            random_tile = tile_road; /*this prevents multiple layers of grass or pavement from spawning*/
+
+        previous_tile = random_tile;
+
+        /*put cars on the lane*/
         if(random_tile==tile_road){
-            Car* c = new_car(0,x, rand_in_range(1,5));
-            /*generate random car type*/
-            c->car_type = (CarType) rand_in_range(0,2); /*3 car types, in range 0-2*/
-            add_car(Game, c);
+            int cars_on_lane = rand_in_range(LANE_CARS_MIN, LANE_CARS_MAX);
+            int x_offset = BOARD_X / cars_on_lane; /*offset applied so cars will spawn uniformly on the lane*/
+            for(int y =0;y<cars_on_lane;y++){
+                Car* c = new_random_car(x_offset*y,x, game->frog);
+                add_car(Game, c);
+            }
         }
 
         background_fill_area(bg, 0,x,bg->width,1, random_tile);
@@ -120,7 +130,7 @@ void game_draw(void* this, WINDOW* win, void* additional_data){
 }
 
 void add_car(FrogGame* game,Car* car){
-    if(game->__cars_num >= game->__cars_size);
+    if(game->__cars_num >= game->__cars_size)
         __cars_resize(game, game->__cars_size*2);
     
     game->cars[game->__cars_num++]=car;
@@ -155,6 +165,8 @@ void __cars_clear(FrogGame* game){
     
     free(game->cars);
     game->cars = (Car**)malloc(sizeof(Car*) * CARS_INITIAL_SIZE);
+    game->__cars_num=0;
+    game->__cars_size = CARS_INITIAL_SIZE;
 }
 
 void delete_game(FrogGame* game)

@@ -82,14 +82,10 @@ BackgroundTile* get_random_tile(){
 
     switch (r)
     {
-    case 0:
-        return tile_grass;
-    case 1:
-        return tile_pavement;
-    case 2:
-        return tile_road;
-    default:
-        return tile_grass;
+    case 0: return tile_grass;
+    case 1: return tile_pavement;
+    case 2: return tile_road;
+    default:return tile_grass;
     }
 
 }

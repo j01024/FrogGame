@@ -8,8 +8,10 @@
 #include "utility.h"
 
 #define CARS_INITIAL_SIZE 10
+#define LANE_CARS_MIN 2 /*there are 2 cars minimum on the lane*/
+#define LANE_CARS_MAX 6 /*there are maximum 6 cars on the lane*/
 
-typedef struct game{
+typedef struct game_t{
     events* events;
     drawing* drawing;
 

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 /*position class is interface for all entites that are drawable and have position. It should not be used externally*/
-typedef struct position
+typedef struct position_t
 {
     short x;
     short y;

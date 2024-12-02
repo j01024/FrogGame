@@ -13,6 +13,8 @@ extern chtype COLOR_CAR_TELEPORTER;
 extern chtype COLOR_ROAD;
 extern chtype COLOR_PAVEMENT;
 extern chtype COLOR_GRASS;
+extern chtype COLOR_OBSTACLE_GRASS;
+extern chtype COLOR_OBSTACLE_PAVEMENT;
 
 extern bool __colors_initalized;
 

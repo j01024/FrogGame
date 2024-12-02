@@ -44,8 +44,8 @@ void car_draw(void *this, WINDOW *win, void* additional_data);
 void car_update(void *this);
 void delete_car(Car *car);
 
-bool check_collision_with_frog(void* this); /*checks if given car collided with frog. returns true if collision occured, false otherwise*/
-bool check_frog_in_range(void* this); /*checks whether frog is in friendly car range*/
+bool car_check_collision_with_frog(void* this); /*checks if given car collided with frog. returns true if collision occured, false otherwise*/
+bool car_check_frog_in_range(void* this); /*checks whether frog is in friendly car range*/
 
 Car* new_car(const short pos_x, const short pos_y, float speed_per_second, Frog* frog_ref);
 Car* new_random_car(const short pos_x, const short pos_y, Frog* frog_ref);

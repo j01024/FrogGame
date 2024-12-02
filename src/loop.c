@@ -1,8 +1,12 @@
 #include "../includes/loop.h"
 
+FrogGame* Game; /*pointer to the game i don't any better place to keep it*/
+
+
 /*init all objects here*/
 void init_loop(){
-    init_game();
+    init_background(); /*game requires background initalized, otherwise assertion will fail*/
+    Game = new_game();
     game_generate_background(Game);
 }
 

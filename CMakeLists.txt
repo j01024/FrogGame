@@ -13,6 +13,7 @@ add_executable(FrogGame
                 src/utility.c
                 src/colors.c
                 src/car.c
+                src/obstacle.c
                 src/interfaces/drawing.c
                 src/interfaces/events.c
                 src/interfaces/position.c)

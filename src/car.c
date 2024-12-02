@@ -19,8 +19,8 @@ Car *new_car(const short pos_x, const short pos_y, float speed_per_second, Frog*
     c->speed_per_second = speed_per_second;
 
     c->frog_ref = frog_ref;
-    c->frog_collision = check_collision_with_frog;
-    c->frog_in_range = check_frog_in_range;
+    c->frog_collision = car_check_collision_with_frog;
+    c->frog_in_range = car_check_frog_in_range;
 
     return c;
 }
@@ -50,8 +50,8 @@ Car* new_random_car(const short pos_x, const short pos_y, Frog* frog_ref){
     c->speed_per_second = rand_in_range(CAR_SPEED_MIN, CAR_SPPED_MAX); /*set random speed*/
 
     c->frog_ref = frog_ref;
-    c->frog_collision = check_collision_with_frog;
-    c->frog_in_range = check_frog_in_range;
+    c->frog_collision = car_check_collision_with_frog;
+    c->frog_in_range = car_check_frog_in_range;
 
     return c;
 }
@@ -106,14 +106,14 @@ void car_update(void *this)
         c->direction*=-1; /*swap direction*/
         //c->position->x = 0;
         //c->__float_pos_x = 0.0; /*don't forget also about it*/
-        return;                 /*TODO: despawn car, or change its direction*/
+        return;
     }
 
     c->__float_pos_x += (c->speed_per_second / FPS) * c->direction;
     c->position->x = c->__float_pos_x; /*this automatically casts float to short, working like floor functions. This will ceil for negative numbers though*/
 }
 
-bool check_collision_with_frog(void *this)
+bool car_check_collision_with_frog(void *this)
 {
     assert(this!=NULL);
 
@@ -127,7 +127,7 @@ bool check_collision_with_frog(void *this)
     return false;
 }
 
-bool check_frog_in_range(void* this){
+bool car_check_frog_in_range(void* this){
     assert(this!=NULL);
     Car* c = (Car*)this;
     Frog* f = c->frog_ref;

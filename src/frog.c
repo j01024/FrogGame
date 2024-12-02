@@ -91,6 +91,7 @@ Frog *new_frog(const short pos_x, const short pos_y)
     f->enemy_car_collision = frog_enemy_car_collision;
     f->friendly_car_collision = frog_friendly_car_collision;
     f->teleporter_car_collision = frog_teleporter_car_collision;
+    f->obstacle_collision = frog_obstacle_collision;
 
     return f;
 }
@@ -114,6 +115,14 @@ void frog_teleporter_car_collision(void* this){
 
     f->position->x= rand_in_range(0, BOARD_X - (2*BOARD_BORDER_X) -1);
     f->position->y= rand_in_range(0, BOARD_Y - (2*BOARD_BORDER_Y) -1);
+}
+
+void frog_obstacle_collision(void* this){
+    Frog* f = (Frog*)this;
+
+    /*frog bounces to the previous position*/
+    f->position->x = f->old_position->x;
+    f->position->y = f->old_position->y;
 }
 
 

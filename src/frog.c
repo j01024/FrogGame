@@ -63,6 +63,10 @@ void frog_update(void *this)
         f->position->x++;
         break;
     }
+    case 27:{ /*27 is escape character, i have to add leaving game right here, otherwise if there is too much input, game is unresponsive*/
+        app_force_close();/*this problem could be solved by mapping functions to the keys, this is called key listeners, but programming it might be tricky at this point*/
+        break;
+    }
     default:
         break;
     }

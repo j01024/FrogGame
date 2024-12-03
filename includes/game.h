@@ -7,16 +7,14 @@
 #include "interfaces/drawing.h"
 #include "background.h"
 #include "utility.h"
+#include "win_info.h"
 
 #define CARS_INITIAL_SIZE 20
-#define LANE_CARS_MIN 2 /*there are 2 cars minimum on the lane*/
-#define LANE_CARS_MAX 6 /*there are maximum 6 cars on the lane*/
-
 #define OBSTACLES_INITIAL_SIZE 20
-#define ROADSIDE_OBSTACLES_MIN 2
-#define ROADSIDE_OBSTACLES_MAX 6
 
 typedef struct game_t{
+    int score, level;
+
     events* events;
     drawing* drawing;
 
@@ -32,14 +30,21 @@ typedef struct game_t{
 
     int __obstacles_num;
     int __obstacles_size;
-    Obstacle** obstacles; /*array of pointers (references)*/
-
-    
+    Obstacle** obstacles; /*array of pointers (references)*/   
 }FrogGame;
+
+void game_init_info(FrogGame* game, WINDOW* win_info);
 
 FrogGame* new_game(); /*creates new instance of FrogGame*/
 void delete_game(FrogGame* game); /*frees resources used by game*/
+
 void game_update(void* this);
+void game_update_cars(FrogGame* game);
+void game_update_obstacles(FrogGame* game);
+
+void game_level_end(FrogGame* game);
+void game_lose(FrogGame* game);
+
 void game_draw_background(FrogGame* game, WINDOW* win); /*draws background on given window*/
 void game_generate_background(FrogGame* game); /*generates new background for frog game*/
 void game_draw(void* this, WINDOW* win, void* additional_data); /*draws all game object on given window, no additional data required, set additional_data to NULL*/
@@ -49,10 +54,12 @@ void __cars_resize(FrogGame* game, int new_size); /*can be used also to change s
 void __cars_clear(FrogGame* game); /*deletes all cars, sets size to initial size*/
 /*if needed add __cars_remove, right now it doesnt seem to be needed*/
 
-void add_obstacle(FrogGame* game, Obstacle* o);
-void __obstacles_resize(FrogGame* game, int new_size);
-void __obstacles_clear(FrogGame* game);
+void add_obstacle(FrogGame* game, Obstacle* o);/*adds obstacle to the game*/
+void __obstacles_resize(FrogGame* game, int new_size); /*can be used also to change size to smaller*/
+void __obstacles_clear(FrogGame* game); /*deletes all obstacles, sets size to initial size*/
 /*if needed add __obstacles_remove, right now it doesnt seem to be needed*/
 
+extern const char* game_over_big[];/*53x25*/
+extern const char* game_over_small[];/*31x9*/
 
 #endif

@@ -6,6 +6,7 @@
 #include "setup.h"
 #include "game.h"
 #include "background.h"
+#include "win_info.h"
 
 /*init all objects here*/
 void init_loop();

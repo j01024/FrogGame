@@ -15,7 +15,7 @@ bool dice_roll(double percent_chance){
 int* random_sample_int(int min, int max, int count){
     assert(max-min > count && "Count has to be greater than max-min");
 
-    int num_count = (max-min) +1; /*+1 to create <min,max> range*/
+    int num_count = (max-min); /*+1 to create <min,max> range*/
     int* all=malloc(sizeof(int)*num_count); /*create array with all possible numbers*/
     int* out = malloc(sizeof(int)*count);
     for(int i=0;i<num_count;i++)

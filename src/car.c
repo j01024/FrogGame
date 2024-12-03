@@ -66,7 +66,7 @@ void car_draw(void *this, WINDOW *win, void *additional_data)
 
     wattron(win, old_color);
     mvwaddch(win, c->old_position->y + BOARD_BORDER_Y, c->old_position->x + BOARD_BORDER_X, ' '); /*clear previous position*/
-    wrefresh(win);                                                                                /*refresh window, otherwise we will have rendering artifacts and I don't know why*/
+    wrefresh(win); /*refresh window, otherwise we will have rendering artifacts and I don't know why*/
 
     /*get proper car color depending on its type*/
     chtype car_color;
@@ -86,7 +86,7 @@ void car_draw(void *this, WINDOW *win, void *additional_data)
     }
 
     wattron(win, car_color);
-    mvwaddch(win, c->position->y + BOARD_BORDER_Y, c->position->x + BOARD_BORDER_X, '*'); /*+1 to omit border*/
+    mvwaddch(win, c->position->y + BOARD_BORDER_Y, c->position->x + BOARD_BORDER_X, GAME_SETTINGS->car_char); /*+1 to omit border*/
     wattroff(win, car_color);
 }
 
@@ -109,7 +109,7 @@ void car_update(void *this)
         return;
     }
 
-    c->__float_pos_x += (c->speed_per_second / FPS) * c->direction;
+    c->__float_pos_x += (c->speed_per_second / GAME_SETTINGS->fps) * c->direction;
     c->position->x = c->__float_pos_x; /*this automatically casts float to short, working like floor functions. This will ceil for negative numbers though*/
 }
 
@@ -148,7 +148,7 @@ void delete_car(Car *car)
     free(car->position);
     free(car->old_position);
     free(car->drawing);
-    free(car->old_position);
+    free(car->events);
 
     free(car);
 }

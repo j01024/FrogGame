@@ -13,6 +13,8 @@
 
 typedef struct frog_t
 {
+    int lives;
+
     position* old_position; /*old position is used to erase previous position to prevent clearing whole screen while drawing*/
     position *position;
     drawing *drawing;
@@ -24,6 +26,8 @@ typedef struct frog_t
     void (*friendly_car_collision)(void* this);
     void (*teleporter_car_collision)(void* this);
     void(*obstacle_collision)(void* this);
+    void(*level_end)(void* this);
+
 }Frog;
 
 void frog_draw(void *this, WINDOW *win, void* additional_data); /*set additional_data expects pointer to background to be present*/
@@ -34,6 +38,8 @@ void frog_friendly_car_collision(void* this);
 void frog_teleporter_car_collision(void* this);
 
 void frog_obstacle_collision(void* this);
+
+void frog_level_end(void* this);
 
 Frog *new_frog(const short pos_x, const short pos_y);
 void delete_frog(Frog *frog);

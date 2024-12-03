@@ -14,9 +14,12 @@ add_executable(FrogGame
                 src/colors.c
                 src/car.c
                 src/obstacle.c
+                src/settings.c
+                src/win_info.c
                 src/interfaces/drawing.c
                 src/interfaces/events.c
                 src/interfaces/position.c)
+
 target_link_libraries(FrogGame ncurses)
 
 target_include_directories(FrogGame PRIVATE

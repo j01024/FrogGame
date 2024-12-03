@@ -31,7 +31,7 @@ void obstacle_draw(void* this, WINDOW* win, void* additional_data){
    }
 
    wattron(win, color);
-   mvwaddch(win, o->position->y + BOARD_BORDER_Y, o->position->x + BOARD_BORDER_X, '$');
+   mvwaddch(win, o->position->y + BOARD_BORDER_Y, o->position->x + BOARD_BORDER_X, GAME_SETTINGS->obstacle_char);
    wattroff(win, color);
 }
 

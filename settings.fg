@@ -1,0 +1,17 @@
+/*game settings template, please do not change order of settings, otherwise they won't work*/
+
+GAME_FPS = 15  /*do not set this below 10, otherwise game will tend to crash*/
+SIZE_BOARD_X = 50
+SIZE_BOARD_Y = 30
+
+FROG_CHAR = O
+CAR_CHAR = *
+OBSTACLE_CHAR = #
+
+LANE_CARS_MIN = 2
+LANE_CARS_MAX = 6
+ROADSIDE_OBSTACLES_MIN = 6
+ROADSIDE_OBSTACLES_MAX = 8
+
+FROG_LIVES = 5
+FROG_JUMP_DELAY_MS = 100

@@ -1,13 +1,58 @@
 #include "../includes/game.h"
 
+/*31x9*/
+const char* game_over_small[] = {
+    "                              ",
+    "    ___   __   _  _  ____     ",
+    "   / __) / _\\ ( \\/ )(  __)    ",
+    "  ( (_ \\/    \\/ \\/ \\ ) _)     ",
+    "   \\___/\\_/\\_/\\_)(_/(____)    ",
+    "    __   _  _  ____  ____     ",
+    "   /  \\ / )( \\(  __)(  _ \\    ",
+    "  (  O )\\ \\/ / ) _)  )   /    ",
+    "   \\__/  \\__/ (____)(__\\_)    "
+    "                              ",
+};
+
+/*53x25*/
+const char* game_over_big[] = {
+    "                                                    ",
+    "                                                    ",
+    "                                                    ",
+    "     $$$$$$\\   $$$$$$\\  $$\\      $$\\ $$$$$$$$\\      ",
+    "     $$  __$$\\ $$  __$$\\ $$$\\    $$$ |$$  _____|    ",
+    "     $$ /  \\__|$$ /  $$ |$$$$\\  $$$$ |$$ |          ",
+    "     $$ |$$$$\\ $$$$$$$$ |$$\\$$\\$$ $$ |$$$$$\\        ",
+    "     $$ |\\_$$ |$$  __$$ |$$ \\$$$  $$ |$$  __|       ",
+    "     $$ |  $$ |$$ |  $$ |$$ |\\$  /$$ |$$ |          ",
+    "     \\$$$$$$  |$$ |  $$ |$$ | \\_/ $$ |$$$$$$$$\\     ",
+    "     \\______/ \\__|  \\__|\\__|     \\__|\\________|     ",
+    "                                                    ",
+    "                                                    ",
+    "                                                    ",
+    "     $$$$$$\\  $$\\    $$\\ $$$$$$$$\\ $$$$$$$\\         ",
+    "     $$  __$$\\ $$ |   $$ |$$  _____|$$  __$$\\       ",
+    "     $$ /  $$ |$$ |   $$ |$$ |      $$ |  $$ |      ",
+    "     $$ |  $$ |\\$$\\  $$  |$$$$$\\    $$$$$$$  |      ",
+    "     $$ |  $$ | \\$$\\$$  / $$  __|   $$  __$$<       ",
+    "     $$ |  $$ |  \\$$$  /  $$ |      $$ |  $$ |      ",
+    "     $$$$$$  |   \\$  /   $$$$$$$$\\ $$ |  $$ |       ",
+    "     \\______/     \\_/    \\________|\\__|  \\__|       ",
+    "                                                    ",
+    "                                                    ",
+    "                                                    ",
+};
 
 FrogGame* new_game()
 {
     assert(__background_initialized && "Background has not been initialized, use init_background in your setup to initialize");
     FrogGame* game = (FrogGame*)malloc(sizeof(FrogGame));
     game->background = new_background(BOARD_X-BOARD_BORDER_X*2,BOARD_Y-BOARD_BORDER_Y*2); /*border is from 2 sides*/
-    game->frog = new_frog(BOARD_X/2,BOARD_Y - 2*BOARD_BORDER_Y - 1);; /*middle bottom of board*/
+    game->frog = new_frog(BOARD_X/2,BOARD_Y - 2*BOARD_BORDER_Y - 1); /*middle bottom of board*/
     fill_background(game->background, tile_default); /*fill background with default tile to prevent frustrating null errors, when you forget about it*/
+
+    game->score=0;
+    game->level=1;
 
     game->events = new_events();
     game->events->update= game_update;
@@ -26,13 +71,77 @@ FrogGame* new_game()
     return game;
 }
 
+void game_init_info(FrogGame* game, WINDOW* win_info){
+    info_update_lives(win_info, game->frog->lives);
+    info_update_score(win_info, game->score);
+    info_update_level(win_info,game->level);
+}
+
 void game_update(void* this){
     FrogGame* game = (FrogGame*)this;
     Frog* frog = game->frog;
 
     frog->events->update(game->frog);
 
-    /*update cars*/
+    game_update_cars(game);
+    game_update_obstacles(game);
+
+    if(frog->position->y==0) game_level_end(game);
+    if(frog->lives==0) game_lose(game);
+}
+
+void game_lose(FrogGame* game){
+
+    /*if screen will be too small even for small game over, it just won't display*/
+    bool big = BOARD_X > strlen(game_over_big[0]);
+
+    int height = big ? 25 : 9;
+    int width = big ? strlen(game_over_big[0]) : strlen(game_over_small[0]);
+
+    int start_row = (BOARD_Y - height) / 2;
+    int start_col = (BOARD_X - width) / 2;
+
+    wattron(WIN_BOARD, COLOR_DEFAULT);
+    for (int i = 0; i < height; i++)
+         mvwaddstr(WIN_BOARD, start_row + i, start_col, big ? game_over_big[i] : game_over_small[i]);
+
+    wrefresh(WIN_BOARD);
+    wattroff(WIN_BOARD, COLOR_DEFAULT);
+
+    wgetch(WIN_BOARD);
+    game_level_end(game); /*this auto generates new level etc*/
+    game->score=0;
+    game->level=1;
+
+    /*make sure to update info*/
+    info_update_level(WIN_INFO, game->level);
+    info_update_lives(WIN_INFO, game->frog->lives);
+    info_update_score(WIN_INFO, game->score);
+}
+
+void game_level_end(FrogGame* game){
+    Frog* frog = game->frog;
+    game->score+=game->level*100 + frog->lives *100;
+
+    frog->level_end(frog);
+    game->level++;
+
+    info_update_level(WIN_INFO, game->level);
+    info_update_lives(WIN_INFO, frog->lives);
+    info_update_score(WIN_INFO, game->score);
+
+    /*remove actual cars, obstacles and generate new level*/
+    __cars_clear(game);
+    __obstacles_clear(game);
+    delete_background(game->background);
+    game->background=NULL; /*otherwise game generate background will not create new background if actual is null*/
+
+    game_generate_background(game);
+}
+
+void game_update_cars(FrogGame* game){
+    Frog* frog = game->frog;
+
     for(int i=0;i<game->__cars_num;i++){
         Car* c = game->cars[i];
         c->events->update(game->cars[i]);
@@ -45,6 +154,7 @@ void game_update(void* this){
                     break;
                 case CAR_ENEMY:
                     frog->enemy_car_collision(frog);
+                    info_update_lives(WIN_INFO, frog->lives); /*upadte lives after collision*/
                     break;
                 case CAR_TELEPORTER:
                     frog->teleporter_car_collision(frog);
@@ -53,8 +163,11 @@ void game_update(void* this){
             }
         } 
     }
+}
 
-    /*check obstacle collisions*/
+void game_update_obstacles(FrogGame* game){
+    Frog* frog = game->frog;
+
     for(int i=0;i<game->__obstacles_num;i++){
         Obstacle* o = game->obstacles[i];
         if(o->frog_collision(o))
@@ -85,6 +198,8 @@ void game_draw_background(FrogGame* game, WINDOW* win){
 
 void game_generate_background(FrogGame* game){
     assert(game!=NULL);
+    if(game->background==NULL) 
+        game->background = new_background(BOARD_X-BOARD_BORDER_X*2,BOARD_Y-BOARD_BORDER_Y*2); /*generate new background if previous one has been deleted*/
     Background* bg = game->background;
 
     /*top is always grass, since level ends here, and bottom should be always pavement (you can change to grass) cause frog spawns here, and we don't want instant death*/
@@ -100,7 +215,7 @@ void game_generate_background(FrogGame* game){
 
         /*put cars on the lane*/
         if(random_tile==tile_road){
-            int cars_on_lane = rand_in_range(LANE_CARS_MIN, LANE_CARS_MAX);
+            int cars_on_lane = rand_in_range(GAME_SETTINGS->lane_cars_min, GAME_SETTINGS->lane_cars_max);
             int x_offset = BOARD_X / cars_on_lane; /*offset applied so cars will spawn uniformly on the lane*/
             for(int y =0;y<cars_on_lane;y++){
                 Car* c = new_random_car(x_offset*y,x, game->frog);
@@ -111,8 +226,8 @@ void game_generate_background(FrogGame* game){
         /*put obstacles on the grass and pavement*/
         if(random_tile == tile_grass || random_tile == tile_pavement){
             ObstacleType type = random_tile==tile_grass ? OBSTACLE_GRASS : OBSTACLE_PAVEMENT;
-            int obstacles_on_roadside = rand_in_range(ROADSIDE_OBSTACLES_MIN, ROADSIDE_OBSTACLES_MAX);
-            int* random_indexes = random_sample_int(0, BOARD_X - 2*BOARD_BORDER_X, obstacles_on_roadside); /*get random indexes which do not overlap*/
+            int obstacles_on_roadside = rand_in_range(GAME_SETTINGS->roadside_obstacles_min, GAME_SETTINGS->roadside_obstacles_max);
+            int* random_indexes = random_sample_int(0,BOARD_X - 2*BOARD_BORDER_X -1, obstacles_on_roadside); /*get random indexes which do not overlap*/
             for(int y=0;y<obstacles_on_roadside;y++){
                 Obstacle* o  = new_obstacle(random_indexes[y],x, game->frog);
                 o->type = type; /*set obstacle type before adding*/
@@ -173,7 +288,7 @@ void __cars_resize(FrogGame* game, int new_size){
 void __cars_clear(FrogGame* game){
     for(int i=0;i<game->__cars_num;i++)
         delete_car(game->cars[i]);
-    
+       
     free(game->cars);
     game->cars = (Car**)malloc(sizeof(Car*) * CARS_INITIAL_SIZE);
     game->__cars_num=0;
@@ -215,7 +330,7 @@ void __obstacles_clear(FrogGame* game){
         delete_obstacle(game->obstacles[i]);
     
     free(game->obstacles);
-    game->obstacles = (Obstacle**)malloc(sizeof(Obstacle*) * CARS_INITIAL_SIZE);
+    game->obstacles = (Obstacle**)malloc(sizeof(Obstacle*) * OBSTACLES_INITIAL_SIZE);
     game->__obstacles_num=0;
     game->__obstacles_size = OBSTACLES_INITIAL_SIZE;
 }
